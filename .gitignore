@@ -53,3 +53,4 @@ dkms.conf
 
 # Data File
 Phone_Book/data/Phone_number.txt
+Phone_Book/data/*
