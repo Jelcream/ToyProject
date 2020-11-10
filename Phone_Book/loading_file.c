@@ -51,8 +51,8 @@ void init_table(FILE *fp){
                     phone_table[index].phone_start = offset;
                     order++;
                     break;
-                case 10:
-                    phone_table[index].phone_len = offset - phone_table[index].phone_start -2;
+                case 11:
+                    phone_table[index].phone_len = offset - phone_table[index].phone_start -3;
                     phone_table[index].memo_start = offset+1;
                     order++;
                     break;  
@@ -140,7 +140,7 @@ void list_Phone(FILE * fp, int book){
         fseek(fp,memo,SEEK_SET);
         fread(memo_buf, sizeof(char),memo_len,fp);
         memo_buf[memo_len]='\0';
-        printf("=========================================\nname: %s\nphone number: %s\nbook mark: %s\nmemo: %s\n=========================================",name_buf,phone_buf,b1,memo_buf);
+        printf("=========================================\nname: %s\nphone number: %s\nbook mark: %s\nmemo: %s\n=========================================\n",name_buf,phone_buf,b1,memo_buf);
         //if((i + 1) % 10 == 0)system("pause");
     }
 }
