@@ -21,6 +21,7 @@ Table phone_table[TAB_SIZE];
 
 
 void init_table(FILE *fp){
+    // ****error control****
     long offset = 0;
     int entry = 1, n;
     int index = 0, order = 0;
@@ -140,7 +141,7 @@ void list_Phone(FILE * fp, int book){
         fread(memo_buf, sizeof(char),memo_len,fp);
         memo_buf[memo_len]='\0';
         printf("=========================================\nname: %s\nphone number: %s\nbook mark: %s\nmemo: %s\n=========================================",name_buf,phone_buf,b1,memo_buf);
-        if((i + 1) % 10 == 0)system("pause");
+        //if((i + 1) % 10 == 0)system("pause");
     }
 }
 void print_ui(){
@@ -150,16 +151,53 @@ void print_ui(){
     printf("\t\t|                                              |\n");
     printf("\t\t================================================\n");
     printf("\n\n");
-    printf("\t\t1. 이름 검색\n");
-    printf("\t\t2. 전화번호 검색\n"); 
-    printf("\t\t3. 연락처 추가\n");
+    printf("\t\t1. check Search name\n");
+    printf("\t\t2. check Search Phone Number\n"); 
+    printf("\t\t3. check 연락처 추가\n");
     printf("\t\t4. 연락처 삭제\n");
-    printf("\t\t5. 연락처 리스트\n");
-    printf("\t\t6. 즐겨찾기 리스트\n");
+    printf("\t\t5. check Phone Number list\n");
+    printf("\t\t6. check Book mark list\n");
     printf("\t\t7. 연락처 정보 수정\n");
     printf("\n");
     printf("\t\t원하는 숫자를 입력해주세요.>");
 }
+char* make_phone_number_item(char book, char*name, char*phone, char* memo){
+    char* result = (char *) malloc(sizeof(char)*BUF_SIZE);
+    result[0] = book;result[1] ='\0';
+    strcat(result, "$%$");
+    strcat(result, name);
+    strcat(result, "$%$");
+    strcat(result, phone);
+    strcat(result, "$%$");
+    strcat(result, memo);
+    strcat(result, "\n");
+    printf("%s",result);
+    return result;
+}
+
+void add_phone(){
+    // need input: name, phone, memo, book
+    // ****error control****
+    char name_buf[50], phone_buf[50], memo_buf[50], book;
+    char result[BUF_SIZE];
+    FILE * fp;
+    fp = fopen("data\\test_phone.txt", "a");
+    printf("name: ");scanf("%s", name_buf);
+    printf("phone: ");scanf("%s", phone_buf);
+    printf("Do you want take the notes?(Y/N)"); scanf(" %c", &book);
+    if(book == 'y' || book == 'Y')
+        printf("memo: ");scanf("%s",memo_buf);
+    printf("Do you want a book mark on this phone Number?(Y/N): ");scanf(" %c", &book);
+    strcpy(result, make_phone_number_item(book, name_buf, phone_buf, memo_buf));
+    printf("%d\n",strlen(result));
+    fwrite(result,sizeof(char),strlen(result),fp);
+    fclose(fp);
+};
+
+
+
+
+
 int main(){
     FILE *fp;
     fp = fopen("data\\Phone_number.txt","r");
@@ -172,7 +210,8 @@ int main(){
     //system("cls");
     //print_ui();
     system("cls");
-    int * arr = search_name(fp,"지",2);
+    //it needs exact name
+    int * arr = search_name(fp,"Name",2);
     for(int i = 0; arr[i] != -1; i++){
         if(arr[i] != -1){
             fseek(fp,phone_table[arr[i]].name_start,SEEK_SET);
@@ -182,7 +221,8 @@ int main(){
             printf("%s\n", buf);
         }
     }
-    arr = search_phone(fp,"010-0770-3160");
+    //it needs exact phone
+    arr = search_phone(fp,"Phone_number");
     for(int i = 0; arr[i] != -1; i++){
         if(arr[i] != -1){
             fseek(fp,phone_table[arr[i]].phone_start,SEEK_SET);
@@ -193,8 +233,8 @@ int main(){
         }
     }
     system("cls");
-    list_Phone(fp,0);
+    list_Phone(fp,0); // 0 -> Booked, 1 -> not book
     fclose(fp);
-
+    add_phone();
     return 0;
 }
