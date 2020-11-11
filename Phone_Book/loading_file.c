@@ -3,7 +3,7 @@
 #include <string.h>
 #include <memory.h>
 #include <io.h>
-
+#include <ctype.h>
 #define BUF_SIZE 150
 #define TAB_SIZE 500
 #define BOOK_START 1
@@ -391,9 +391,10 @@ void remove_item(FILE* fp, int index){
 }
 
 void modify_contact(FILE * fp){
-    int index, len, offset =0;
+    int index, len, offset =0,size;
+    char check;
     char bookmark;
-    char* buf;
+    char* buf, *buf2;
     char name_buf[50], phone_buf[15], memo_buf[100];
     printf("\t\t          Modify contact\n\n");
     printf("Please enter the number to be modified: ");scanf("%d",&index);
@@ -403,24 +404,81 @@ void modify_contact(FILE * fp){
     }
     buf = getBook(fp,index);
     bookmark = buf[0];
+    printf("\nBefore : %c\n",bookmark);
     free(buf);
+    printf("Would you like to change your bookmark?(Y/N): ");
+    scanf(" %c", &check);
+    if(check == 'Y'|| check == 'y' ){
+        bookmark =0;
+        while(bookmark != 'Y' && bookmark != 'y' && bookmark != 'N' && bookmark != 'n'){
+            printf("\nEnter the BookMark: ");
+            scanf(" %c",&bookmark);
+        }
+        bookmark = toupper(bookmark);
+    }
 
     buf = getName(fp,index);
     strncpy(name_buf,buf,phone_table[index].name_len);
-    printf("%s\n",name_buf);
+    printf("\nBefore: %s\n",name_buf);
+    printf("Would you like to change the name?(Y/N): ");
+    scanf(" %c", &check);
+    if(check == 'Y'|| check == 'y' ){
+        printf("Enter the name: ");
+        scanf("%s",name_buf);
+    }
     free(buf);
 
     buf = getPhone(fp,index);
     strncpy(phone_buf,buf,phone_table[index].phone_len);
-    printf("%s\n",phone_buf);
+    printf("\nBefore: %s\n",phone_buf);
+    printf("Would you like to change the phone number?(Y/N): ");
+    scanf(" %c", &check);
+    if(check == 'Y'|| check == 'y' ){
+        printf("Enter the phone number: ");
+        scanf("%s",phone_buf);
+    }
     free(buf);
 
     buf = getMemo(fp,index);
-    strncpy(memo_buf,buf+offset,phone_table[index].memo_len);
-    printf("%s\n",memo_buf);
+    strncpy(memo_buf,buf,phone_table[index].memo_len);
+    printf("\nBefore: %s\n",memo_buf);
+    printf("Would you like to change the memo?(Y/N): ");
+    scanf(" %c", &check);
+    if(check == 'Y'|| check == 'y' ){
+        printf("Enter the memo: ");
+        scanf("%s", memo_buf);
+    }
     free(buf);
 
     printf("no.%d\nname: %s\nPhone number: %s\nmemo: %s\n",index,name_buf,phone_buf,memo_buf);
+    size = 1+3+strlen(name_buf)+3+strlen(phone_buf)+3+strlen(memo_buf)+2;
+    buf = (char*) malloc(size);
+    memset(buf,0,size);
+    buf[0] = bookmark;
+    strcat(buf, "$%$");
+    strcat(buf, name_buf);
+    strcat(buf, "$%$");
+    strcat(buf, phone_buf);
+    strcat(buf, "$%$");
+    strcat(buf, memo_buf);
+    strcat(buf,"\n");
+    printf("%s",buf);
+    //init_table(fp,1);
+
+    fseek(fp,phone_table[index+1].offset,SEEK_SET);
+    len = filelength(fileno(fp))+ftell(fp);
+    buf2 = (char *)malloc(len+1);
+    fread(buf2, sizeof(char), len, fp);
+    fseek(fp,phone_table[index].offset,SEEK_SET);
+    fwrite(buf,sizeof(char),strlen(buf),fp);
+    fflush(fp);
+    fwrite(buf2,sizeof(char),len,fp);
+    fflush(fp);
+    _chsize(fileno(fp),ftell(fp));
+    
+
+    free(buf2);
+    free(buf);
 }
 
 
@@ -450,5 +508,6 @@ char* getMemo(FILE*fp,int index){
     fseek(fp,phone_table[index].memo_start,SEEK_SET);
     buf = (char *) malloc(phone_table[index].memo_len+1);
     fread(buf,sizeof(char),phone_table[index].memo_len,fp);
+    buf[phone_table[index].memo_len]='\0';
     return buf;
 }
