@@ -535,3 +535,10 @@ char* getBook(FILE*fp,int index){
     return buf;
 }
 char* getMemo(FILE*fp,int index){
+    char* buf;
+    fseek(fp,phone_table[index].memo_start,SEEK_SET);
+    buf = (char *) malloc(phone_table[index].memo_len+1);
+    fread(buf,sizeof(char),phone_table[index].memo_len,fp);
+    buf[phone_table[index].memo_len]='\0';
+    return buf;
+}
